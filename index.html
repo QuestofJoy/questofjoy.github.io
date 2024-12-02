@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Question</title>
+    <title>Quiz with Scoring</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,32 +48,101 @@
             margin-top: 20px;
             font-weight: bold;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="quiz-container">
-        <div class="question">What is the capital of France?</div>
-        <ul class="options">
-            <li><button class="btn" onclick="checkAnswer(this, 'incorrect')">Berlin</button></li>
-            <li><button class="btn" onclick="checkAnswer(this, 'correct')">Paris</button></li>
-            <li><button class="btn" onclick="checkAnswer(this, 'incorrect')">Madrid</button></li>
-            <li><button class="btn" onclick="checkAnswer(this, 'incorrect')">Rome</button></li>
-        </ul>
-        <div class="result" id="result"></div>
+        <div id="quiz">
+            <div class="question" id="question">Question will appear here</div>
+            <ul class="options" id="options"></ul>
+        </div>
+        <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
+        <div class="result hidden" id="final-result"></div>
     </div>
 
     <script>
-        function checkAnswer(button, status) {
-            const resultDiv = document.getElementById('result');
-            if (status === 'correct') {
-                resultDiv.textContent = "Correct! 🎉";
-                resultDiv.style.color = 'green';
+        const questions = [
+            {
+                question: "What is the capital of France?",
+                options: ["Berlin", "Paris", "Madrid", "Rome"],
+                correctIndex: 1
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Earth", "Mars", "Jupiter", "Venus"],
+                correctIndex: 1
+            },
+            {
+                question: "What is the largest ocean on Earth?",
+                options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+                correctIndex: 3
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        function loadQuestion() {
+            const questionData = questions[currentQuestionIndex];
+            const questionElement = document.getElementById('question');
+            const optionsElement = document.getElementById('options');
+            const nextButton = document.getElementById('next-btn');
+            const finalResult = document.getElementById('final-result');
+
+            // Reset display
+            nextButton.classList.add('hidden');
+            finalResult.classList.add('hidden');
+            optionsElement.innerHTML = '';
+
+            questionElement.textContent = questionData.question;
+            questionData.options.forEach((option, index) => {
+                const li = document.createElement('li');
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'btn';
+                button.onclick = () => checkAnswer(index);
+                li.appendChild(button);
+                optionsElement.appendChild(li);
+            });
+        }
+
+        function checkAnswer(selectedIndex) {
+            const questionData = questions[currentQuestionIndex];
+            const nextButton = document.getElementById('next-btn');
+
+            if (selectedIndex === questionData.correctIndex) {
+                score++;
+                alert('Correct!');
             } else {
-                resultDiv.textContent = "Wrong! Try again.";
-                resultDiv.style.color = 'red';
+                alert('Wrong! The correct answer was: ' + questionData.options[questionData.correctIndex]);
+            }
+
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                displayFinalScore();
             }
         }
+
+        function displayFinalScore() {
+            const quizElement = document.getElementById('quiz');
+            const finalResult = document.getElementById('final-result');
+
+            quizElement.classList.add('hidden');
+            finalResult.classList.remove('hidden');
+            finalResult.textContent = `Quiz completed! Your score: ${score} / ${questions.length}`;
+        }
+
+        // Load the first question
+        loadQuestion();
     </script>
 </body>
 </html>
-

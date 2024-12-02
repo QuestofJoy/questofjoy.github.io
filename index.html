@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz with Scoring</title>
+    <title>Multi-Section Quiz</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,17 +20,6 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-        .question {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        .options {
-            list-style-type: none;
-            padding: 0;
-        }
-        .options li {
-            margin: 10px 0;
-        }
         .btn {
             display: inline-block;
             padding: 10px 15px;
@@ -40,9 +29,21 @@
             border-radius: 5px;
             cursor: pointer;
             border: none;
+            margin: 5px 0;
         }
         .btn:hover {
             background-color: #0056b3;
+        }
+        .question, .section-title {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin: 10px 0;
         }
         .result {
             margin-top: 20px;
@@ -55,49 +56,62 @@
 </head>
 <body>
     <div class="quiz-container">
-        <div id="quiz">
+        <div id="section-select">
+            <div class="section-title">Choose a Quiz Section:</div>
+            <button class="btn" onclick="startQuiz('general')">General Knowledge</button>
+            <button class="btn" onclick="startQuiz('countries')">Countries</button>
+            <button class="btn" onclick="startQuiz('animals')">Animals</button>
+        </div>
+
+        <div id="quiz" class="hidden">
             <div class="question" id="question">Question will appear here</div>
             <ul class="options" id="options"></ul>
+            <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
         </div>
-        <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next Question</button>
+
         <div class="result hidden" id="final-result"></div>
     </div>
 
     <script>
-        const questions = [
-            {
-                question: "What is the capital of France?",
-                options: ["Berlin", "Paris", "Madrid", "Rome"],
-                correctIndex: 1
-            },
-            {
-                question: "Which planet is known as the Red Planet?",
-                options: ["Earth", "Mars", "Jupiter", "Venus"],
-                correctIndex: 1
-            },
-            {
-                question: "What is the largest ocean on Earth?",
-                options: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
-                correctIndex: 3
-            }
-        ];
+        const quizSections = {
+            general: [
+                { question: "What is 2 + 2?", options: ["3", "4", "5", "6"], correctIndex: 1 },
+                { question: "What is the color of the sky?", options: ["Green", "Blue", "Red", "Yellow"], correctIndex: 1 }
+            ],
+            countries: [
+                { question: "What is the capital of Japan?", options: ["Seoul", "Tokyo", "Beijing", "Bangkok"], correctIndex: 1 },
+                { question: "Which country is known as the Land of the Rising Sun?", options: ["China", "Japan", "India", "Thailand"], correctIndex: 1 }
+            ],
+            animals: [
+                { question: "Which is the largest mammal?", options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"], correctIndex: 1 },
+                { question: "What do pandas primarily eat?", options: ["Bamboo", "Fruits", "Insects", "Grass"], correctIndex: 0 }
+            ]
+        };
 
+        let currentSection = null;
         let currentQuestionIndex = 0;
         let score = 0;
 
+        function startQuiz(section) {
+            currentSection = quizSections[section];
+            currentQuestionIndex = 0;
+            score = 0;
+
+            document.getElementById('section-select').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            loadQuestion();
+        }
+
         function loadQuestion() {
-            const questionData = questions[currentQuestionIndex];
+            const questionData = currentSection[currentQuestionIndex];
             const questionElement = document.getElementById('question');
             const optionsElement = document.getElementById('options');
             const nextButton = document.getElementById('next-btn');
-            const finalResult = document.getElementById('final-result');
 
-            // Reset display
             nextButton.classList.add('hidden');
-            finalResult.classList.add('hidden');
             optionsElement.innerHTML = '';
-
             questionElement.textContent = questionData.question;
+
             questionData.options.forEach((option, index) => {
                 const li = document.createElement('li');
                 const button = document.createElement('button');
@@ -110,7 +124,7 @@
         }
 
         function checkAnswer(selectedIndex) {
-            const questionData = questions[currentQuestionIndex];
+            const questionData = currentSection[currentQuestionIndex];
             const nextButton = document.getElementById('next-btn');
 
             if (selectedIndex === questionData.correctIndex) {
@@ -125,7 +139,7 @@
 
         function nextQuestion() {
             currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
+            if (currentQuestionIndex < currentSection.length) {
                 loadQuestion();
             } else {
                 displayFinalScore();
@@ -135,15 +149,17 @@
         function displayFinalScore() {
             const quizElement = document.getElementById('quiz');
             const finalResult = document.getElementById('final-result');
+            const sectionSelect = document.getElementById('section-select');
 
             quizElement.classList.add('hidden');
             finalResult.classList.remove('hidden');
-            finalResult.textContent = `Quiz completed! Your score: ${score} / ${questions.length}`;
-        }
+            finalResult.textContent = `You scored ${score} out of ${currentSection.length}!`;
 
-        // Load the first question
-        loadQuestion();
+            setTimeout(() => {
+                finalResult.classList.add('hidden');
+                sectionSelect.classList.remove('hidden');
+            }, 3000); // Return to section selection after 3 seconds
+        }
     </script>
 </body>
 </html>
-
